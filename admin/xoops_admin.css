@@ -1,0 +1,15 @@
+div#content { background-color: #ffffff; font-family:Verdana, Arial; font-size: 10pt }
+div#content
+td { font-family:Verdana, Arial; font-size: 10pt }
+div#content
+p { font-family:Verdana, Arial; font-size: 10pt }
+div#content
+.title    { font-family:Verdana, Arial; font-size: 12pt; color: #000000; font-weight: bold; }
+div#content
+tr.top-bar { background-color: #98b8e8; padding: 3px; padding: 3px; color: #204888 }
+div#content
+tr.top-bar td { border-top: 1px solid #222222; border-bottom: 1px solid #222222 }
+div#content
+tr.top-bar td.title { text-align: right; font-size: 10pt; font-weight: bold; letter-spacing: 1.0em; }
+div#content
+tr.top-bar td.links { text-align: left; font-size: 8pt }

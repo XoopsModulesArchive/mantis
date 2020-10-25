@@ -1,0 +1,248 @@
+
+This document describes the changes to mantis that I made for integration
+into the Xoops 2 CMS (Content Management System).  This work is an
+'unofficial' modification by myself, so please do not contact the mantis
+team regarding problems that you may discover.
+
+Note that upgrading may not be very easy.  (i.e. How to merge mantis
+changes with my modifications.)  If I have time I will try
+to keep up to date with new releases of mantis, but for now only this
+version (0.18.0a4) exists in modularized form.
+
+I cannot offer direct support for this module.  If you have a have problems
+installing after reading the documentation, please post on the forums
+on www.xoops.org (on a modules forum) and clearly indicate it is for the
+Mantis Bug Tracker module.  If I don't resond within a few days, feel
+free to send me a private message on www.xoops.org.  Please do not contact
+the mantis team.  (Unless of course you have questions how to use the
+features of Mantis itself.)
+
+Mantis modularization for Xoops2 CMS
+Based on Mantis 0.18.0a4
+Copyright 2003, Michael van Dam (mvandam@caltech.edu)
+
+
+History:
+-------
+
+0.18.0a4_rmv003
+
+2003-05-03 - initial release
+
+0.18.0a4_rmv004
+
+2003-05-05 - bugfix: include/search.inc.php, line 15,
+append $g_mantis_user_table, $g_queries_array to the list of globals
+
+2003-05-06 - admin icon: created by w4z004, added in images/mantis_slogo.png;
+also update xoops_version.php to point to this file
+
+2003-05-06 - core/module_api.php, line 369.  Changed !empty to empty to get correct behaviour to detect anonymous users
+
+
+Instructions:
+------------
+
+FRESH INSTALL:
+
+- Just install as normally for an xoops module.
+
+
+FROM PREVIOUS MANTIS INSTALL (UNTESTED!!):
+
+- Dump the database to an sql file.
+- Copy this file over /modules/mantis/sql/xoops_db_generate.sql
+- Install as normal xoops module.
+- (Optional) Revert original /modules/mantis/sql/xoops_db_generate.sql
+
+XOOPS 2 THEMES ARE A LITTLE INCONSISTENT:
+
+- works out of the box for 'default' theme
+- for 'x2t' theme, in themes/x2t/theme.html, change <div class="content">
+to <div id="content">
+- for anything except default theme, insert the line <{$xoops_module_header}>
+just before the line: <script type="text/javascript"> in theme.html
+
+Note: you need to enable the option to load from .html theme files
+in Xoops Preferences (at least temporarily) to see the changes.
+
+
+
+Summary:
+-------
+
+Tried to write in a very generic way (at slight expense of speed)
+so that mantis can be integrated into other CMS very easily.
+I have implemented integration for Xoops 2 only.
+
+Database is (optionally) integrated.  Note the CMS must use a
+mysql database to be compatible.  There is no error checking for
+this.  For xoops, there is currently no option to NOT integrate.
+
+User authentication is integrated with CMS (takes the userNAME).
+This makes compatible with prior existing mantis installation,
+provided the same usernames are used/created in CMS.  For xoops,
+there is currently no option to NOT integrate.
+
+You can give admin access to the module from xoops.  This will assign
+access_level to value ADMINISTRATOR.  If they are demoted in xoops,
+the user returns to the default level.  Note: individual project
+access_level values will NOT change.
+
+Anonymous settings are overridden depending on xoops permissions.
+You may define the anonymous username in mantis though.
+
+The email address is taken from mantis account if defined; otherwise
+the xoops profile is consulted.
+
+Search is integrated for Xoops 2.
+
+Language is integrated.  Language is set to xoops site default
+(if possible), but users can override in their preferences.
+
+Support for admin to create/change accounts is left in.  This
+lets an admin create a user before someone logs in via xoops
+(e.g. to give higher than default access).  To change a username
+the name should be changed in both xoops in mantis.  If not,
+then a NEW user is created on next login from xoops.
+
+If the CMS provides user authentication, the admin pages are
+protected.  Currently they redirect to main_page, and do not
+display any message.  (Since redirect functions not loaded for
+admin pages.)
+
+User menu has option for 'Logout' removed, if CMS user system
+is integrated.  In its place, a link to the home page of the CMS
+is inserted.  If user has admin access, then a link to the admin
+pages is provided as well.
+
+
+FIXME / TODO:
+------------
+
+- Rethink the global definition of xoopsModule for system modules, etc.
+If we set the global we might be breaking other things in xoops.  Maybe
+we should define some new variables which point to same thing?
+
+- Following the mantis coding style more closely... in particular,
+variable names, no ?: constructs, etc...
+http://mantisbt.sourceforge.net/guidelines.php3
+
+- Xoops 2 Themes have different identifiers for content!!!  default
+uses <div id="content"> and x2t uses <div class="content">.  Why?
+Anyways, this screws up style.  Need changes in css/xoops_default.css,
+admin/xoops_admin.css, admin/css/xoops_css_inc.php, and core/module_api.php.
+
+- Probably is stuff I missed, especially with regard to login/logout
+scripts.  (Especially if these URLs typed into address bar.)
+Authentication cookie is no longer used - does this break anything?
+
+- Could speed up include of core/module_api.php if skip some function
+definitions depending on whether the feature is supported.
+
+- May be an issue of ob_start() and some confusion because mantis
+header split into two parts, and not consistent with admin either.
+
+- Not tested whether works with integrated features (display, database,
+and users) turned off.
+
+- Integrate email SENDING (if provided by CMS) so don't need to
+duplicate configuration efforts
+
+- In several places, globals are declared, but I am not sure exactly
+which ones are needed and which are extraneous
+
+- In a few places, we do not have true module-type independence...
+i.e. selection of CSS files is sometimes hardcoded with 'xoops' in
+filename
+
+
+
+Changed Files:
+-------------
+
+admin/xoops_admin.css (XOOPS ONLY)
+- Copies admin/admin.css, but convert for xoops use
+- Removed 'body', and made all within div#content
+
+admin/css/index.php
+- Display integration
+
+admin/css/css_download.php
+- Set to use module css file (XOOPS ONLY)
+
+admin/css/xoops_css_inc.php (XOOPS ONLY)
+- Set default file for use in xoops (added div#content before everything)
+
+core/lang_api.php
+- Removed cookie stuff (GENERAL FIX)
+
+include/search.inc.php (XOOPS ONLY)
+- New file
+- xoops integrated search
+
+admin/check.php
+- Display integration
+- Changed to show connecting to CMS database, and skip the select_db check
+
+sql/xoops_db_generate.sql (XOOPS ONLY)
+- New file
+- Modified sql/db_generate.sql file for xoops install.
+- i.e. Removed insertion of admin user.
+* Also required small modification of xoops/class/database/mysql/sqlutility.php
+
+account_page.php
+- Show mantis email account in prefs so can be edited to override CMS
+
+core/module_api.php
+- New file
+- automatic test to see if mantis is running as module
+- all the module helper functions are here
+
+xoops_version.php (XOOPS_ONLY)
+- New file
+- main xoops install file
+
+language/english/modinfo.php (XOOPS ONLY)
+- New file
+- xoops install file language strings
+
+config_defaults_inc.php
+- Various modifications
+- Automatically set default language from CMS
+- Point to modified css file when embedded in CMS page (XOOPS ONLY)
+- Update table prefixes for functioning with CMS
+- Override anonymous account options
+- Change default logout page (in case someone decides to try logout)
+
+login_page.php
+- Forced selection of CMS username
+
+core/database_api.php
+- Modified for use of CMS database. (XOOPS ONLY? Not all funcs in module_api)
+
+css/xoops_default.css (XOOPS ONLY)
+- New file
+- Modified from css/default.css for use when showing in xoops page
+- In particular, everything is inside 'div id="content"'
+
+core/html_api.php
+- Modified for use of CMS headers, page layout, etc...
+
+core.php
+- Added include of module_api.php
+
+core/authentication_api.php
+- Modified.  Automatically is authenticated if CMS user exists
+- Create parallel mantis user if not yet exists
+- Update login_count when add the user so users don't look inactive
+
+core/current_user_api.php
+- Added handling for anonymous users.
+
+core/user_api.php
+- Added caching of username to userid mapping for performance
+- Selection of email - first try profile, if not found, check CMS
+
+Other files...?
+
